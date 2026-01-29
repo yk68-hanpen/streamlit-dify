@@ -32,7 +32,7 @@ if check_password(): # 前回のログインチェック
     
     review_text = st.text_area("レビュー内容をペーストしてください", height=200)
     
-    if st.button("AI判定を実行", variant="primary"):
+    if st.button("AI判定を実行"):
         if not review_text.strip():
             st.warning("テキストを入力してください。")
         else:
