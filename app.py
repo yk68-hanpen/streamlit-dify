@@ -1,56 +1,46 @@
 import streamlit as st
+import time
 
-# ページの設定
-st.set_page_config(page_title="Streamlit Sample", layout="wide")
+def check_password():
+    """ユーザー名とパスワードをチェックし、OKならTrueを返す"""
+    def login_form():
+        with st.form("login"):
+            st.subheader("ログイン")
+            user = st.text_input("Username")
+            pw = st.text_input("Password", type="password")
+            submit = st.form_submit_button("Login")
+            
+            if submit:
+                # Secretsから取得した値と比較（または直接書き換え）
+                if user == st.secrets.get("USERNAME", "admin") and \
+                   pw == st.secrets.get("PASSWORD", "aws-tam-demo"):
+                    st.session_state["logged_in"] = True
+                    st.rerun()
+                else:
+                    st.error("❌ ユーザー名またはパスワードが違います")
 
-# タイトル
-st.title("🎈 Streamlit サンプルアプリ")
+    if not st.session_state.get("logged_in", False):
+        login_form()
+        return False
+    return True
 
-# テキスト入力
-name = st.text_input("お名前を入力してください:")
-if name:
-    st.write(f"こんにちは、{name}さん！")
+# 認証チェック
+if check_password():
+    # --- ここからメインコンテンツ ---
+    st.sidebar.write(f"Logged in as: {st.secrets.get('USERNAME', 'admin')}")
+    if st.sidebar.button("Logout"):
+        st.session_state["logged_in"] = False
+        st.rerun()
 
-# スライダー
-age = st.slider("年齢を選択してください", 0, 100, 25)
-st.write(f"あなたの年齢: {age}才")
+    st.title("🛒 商品レビュー判定AI")
+    st.info("デモ用：現在は固定メッセージを返します。")
 
-# セレクトボックス
-option = st.selectbox(
-    "好きな色を選んでください:",
-    ["赤", "青", "緑", "黄色"]
-)
-st.write(f"選択した色: {option}")
-
-# チェックボックス
-st.subheader("チェックボックスの例")
-if st.checkbox("詳細情報を表示"):
-    st.write("これは詳細情報です")
-
-# ボタン
-st.subheader("ボタンの例")
-if st.button("クリックしてください"):
-    st.balloons()
-    st.write("ボタンがクリックされました！")
-
-# データフレーム表示
-st.subheader("データフレームの例")
-import pandas as pd
-
-data = {
-    "名前": ["太郎", "花子", "次郎"],
-    "年齢": [25, 30, 28],
-    "職業": ["エンジニア", "デザイナー", "営業"]
-}
-df = pd.DataFrame(data)
-st.dataframe(df)
-
-# グラフの表示
-st.subheader("グラフの例")
-import numpy as np
-
-chart_data = pd.DataFrame(
-    np.random.randn(20, 3),
-    columns=["A", "B", "C"]
-)
-st.line_chart(chart_data)
+    review_text = st.text_area("レビュー内容", placeholder="ここにレビューをペーストしてください")
+    if st.button("判定を実行"):
+        with st.spinner("AI解析中..."):
+            time.sleep(1)
+            # デモ用ロジック
+            if "悪い" in review_text:
+                st.error("判定：ネガティブ")
+            else:
+                st.success("判定：ポジティブ")
